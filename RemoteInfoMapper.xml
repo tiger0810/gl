@@ -1,0 +1,95 @@
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.gl.longrange.mapper.RemoteInfoMapper">
+    <select id="addsele" resultType="ReSftware">
+        SELECT Sf_id,Sf_name FROM resftware
+    </select>
+    <sql id="columns">
+        r.re_id,r.Re_name,r.Re_code,r.Re_pwd,r.Com_name,s.Sf_id,s.Sf_name
+    </sql>
+    <select id="selectRemoteInfo" resultMap="ReInfols" parameterType="remoteInfo" >
+        select
+        <include refid="columns" />
+        FROM RemoteInfo r join  ReSftware s on  r.Sf_id=s.Sf_id
+        <where>
+            <if test="keyword!=null and keyword!='' ">
+               and  r.Re_name=#{keyword}
+            </if>
+
+        </where>
+    </select>
+    <resultMap type="RemoteInfo" id="ReInfols">
+        <id column="Re_id" property="Re_id" ></id>
+        <result column="Re_name" property="Re_name"></result>
+        <result column="Re_code" property="Re_code"></result>
+        <result column="Re_pwd" property="Re_pwd"></result>
+        <result column="Com_name" property="Com_name"></result>
+        <result column="Sf_name" property="Sf_name"></result>
+
+    </resultMap>
+
+<select id="selectfindall" resultMap="ReInfols" parameterType="String">
+    select
+    <include refid="columns" />
+    FROM RemoteInfo r join  ReSftware s on  r.Sf_id=s.Sf_id
+    <where>
+        <if test="Re_name!=null and Re_name!='' ">
+            and  Re_name like '%' #{Re_name} '%'
+        </if>
+
+    </where>
+</select>
+    <!--添加-->
+    <insert id="insertRemoteInfo" parameterType="RemoteInfo">
+insert into remoteinfo (Re_name,Re_code,Re_pwd,Com_name,Sf_id) values
+(#{Re_name},#{Re_code},#{Re_pwd},#{Com_name},#{Sf_id})
+    </insert>
+
+    <!--删除多用户-->
+    <delete id="deleteMany">
+        delete from remoteinfo where Re_id in
+            <foreach collection="list" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+    </delete>
+    <!--删除单用户-->
+    <delete id="deleteRemoteInfo" parameterType="Integer">
+        delete from remoteinfo where Re_id = #{reid}
+    </delete>
+
+    <!--EXCe单个添加-->
+    <insert id="insert" parameterType="RemoteInfo">
+insert into remoteinfo (Re_id,Re_name,Re_code,Re_pwd,Com_name,Sf_id) values
+(#{Re_id},#{Re_name},#{Re_code},#{Re_pwd},#{Com_name},#{Sf_id})
+    </insert>
+    <!--Exce多个添加-->
+       <insert id="insertInfoBatch" parameterType="java.util.List">
+        insert into remoteinfo (Re_id,Re_name,Re_code,Re_pwd,Com_name,Sf_id)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{Re_id,jdbcType=INT},
+            #{Re_name,jdbcType=VARCHAR},
+            #{Re_code,jdbcType=VARCHAR} ,
+            #{Re_pwd,jdbcType=VARCHAR},
+            #{Com_name,jdbcType=INT}),
+            #{Sf_id,jdbcType=INT})
+        </foreach>
+    </insert>
+    <select id="selectByPrimaryKey" resultMap="ReInfols" parameterType="Integer"  >
+        select * from remoteinfo
+        where Re_id = #{Re_id}
+    </select>
+
+    <update id="updateByPrimaryKey" parameterType="remoteinfo" >
+    update remoteinfo
+    set Re_name = #{Re_name},
+      Re_code = #{Re_code},
+      Re_pwd = #{Re_pwd},
+      Com_name = #{Com_name},
+      Sf_id = #{Sf_id}
+    where Re_id = #{Re_id}
+  </update>
+
+</mapper>
